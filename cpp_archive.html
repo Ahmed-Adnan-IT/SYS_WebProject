@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>C++ Archive · v3.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset & Root ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #060a10;
+  --bg2:         #090d15;
+  --card:        #0d1420;
+  --card2:       #101828;
+  --border:      #1a2236;
+  --border2:     #22304a;
+  --fg:          #e8f0ff;
+  --muted:       #7a8fac;
+  --muted2:      #4a5d75;
+  --cyan:        #00f5e4;
+  --cyan-dim:    rgba(0,245,228,.12);
+  --cyan-glow:   rgba(0,245,228,.25);
+  --violet:      #a855f7;
+  --violet-dim:  rgba(168,85,247,.12);
+  --magenta:     #f472b6;
+  --green:       #34d399;
+  --orange:      #fb923c;
+  --red:         #f87171;
+  --radius:      10px;
+  --sidebar-w:   270px;
+  --font-mono:   'JetBrains Mono', monospace;
+  --font-display:'Space Grotesk', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-display);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* mesh grid */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(26,34,54,.55) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,34,54,.55) 1px, transparent 1px);
+  background-size: 90px 90px;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 45% at 85% 0%, rgba(0,245,228,.055) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 50% at 5% 100%, rgba(168,85,247,.045) 0%, transparent 55%);
+}
+
+/* ── Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan-glow); }
+
+/* ── Layout ──────────────────────────────────────────── */
+#sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: rgba(13,20,32,.75);
+  backdrop-filter: blur(22px);
+  border-right: 1px solid var(--border);
+  padding: 26px 16px 120px;
+  z-index: 30;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+#main {
+  margin-left: var(--sidebar-w);
+  padding: 48px 52px 100px;
+  max-width: 1420px;
+  position: relative; z-index: 1;
+}
+
+/* ── Logo ────────────────────────────────────────────── */
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 26px; padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, rgba(0,245,228,.18), rgba(168,85,247,.18));
+  border: 1px solid rgba(0,245,228,.3);
+  display: grid; place-items: center;
+  font-size: 18px;
+}
+.logo-name { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.logo-name span { color: var(--cyan); }
+.logo-ver { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); margin-top: 2px; }
+
+/* ── Sidebar buttons ─────────────────────────────────── */
+.sb-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 13px;
+  border-radius: 9px; border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted); font-family: var(--font-display);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .18s; text-align: left;
+}
+.sb-btn svg { flex-shrink: 0; }
+.sb-btn:hover { background: var(--card2); color: var(--fg); }
+.sb-btn.active {
+  background: var(--cyan-dim);
+  border-color: rgba(0,245,228,.22);
+  color: var(--cyan);
+}
+.sb-btn .cnt {
+  margin-left: auto; font-family: var(--font-mono);
+  font-size: 10px; padding: 2px 7px; border-radius: 5px;
+  background: var(--card2); color: var(--muted2);
+}
+.sb-btn.active .cnt { background: rgba(0,245,228,.15); color: var(--cyan); }
+
+.sb-sep { height: 1px; background: var(--border); margin: 10px 0; }
+.sb-label {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted2); letter-spacing: .12em; padding: 0 13px;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+
+/* primary sidebar btn */
+.btn-primary-sb {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(0,245,228,.3);
+  background: linear-gradient(135deg, rgba(0,245,228,.1), rgba(168,85,247,.1));
+  color: var(--cyan); font-family: var(--font-display);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .2s; margin-bottom: 8px;
+}
+.btn-primary-sb:hover { box-shadow: 0 0 22px rgba(0,245,228,.2); }
+
+/* ── Hero ────────────────────────────────────────────── */
+#hero { margin-bottom: 52px; }
+
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--cyan); letter-spacing: .14em;
+  margin-bottom: 18px;
+}
+.hero-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 9px var(--cyan);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.35)} }
+
+.hero-title {
+  font-size: clamp(38px,5.5vw,68px); font-weight: 800;
+  line-height: 1.05; letter-spacing: -.03em;
+  background: linear-gradient(175deg, var(--fg) 40%, var(--cyan) 120%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 18px;
+}
+.hero-title .hl { -webkit-text-fill-color: var(--cyan); }
+
+.hero-sub {
+  font-size: 15px; color: var(--muted);
+  max-width: 620px; line-height: 1.65; margin-bottom: 36px;
+}
+.hero-sub b { color: var(--fg); font-weight: 500; }
+
+.hero-stats {
+  display: flex; gap: 36px;
+  padding-top: 28px; border-top: 1px solid var(--border);
+}
+.stat-val {
+  font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1;
+}
+.stat-lbl {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted2); letter-spacing: .12em;
+  text-transform: uppercase; margin-top: 7px;
+}
+
+/* ── Filter bar ──────────────────────────────────────── */
+#filter-bar {
+  margin-bottom: 30px;
+  padding: 15px 18px;
+  border-radius: 12px;
+  background: rgba(13,20,32,.6);
+  border: 1px solid var(--border);
+}
+.filter-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.filter-title {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--cyan); letter-spacing: .1em; text-transform: uppercase;
+}
+#clear-tags-btn {
+  margin-left: auto; background: transparent;
+  border: 1px solid var(--border); border-radius: 6px;
+  color: var(--muted); font-family: var(--font-display);
+  font-size: 11px; padding: 3px 10px; cursor: pointer;
+  display: none; align-items: center; gap: 5px;
+  transition: all .15s;
+}
+#clear-tags-btn:hover { color: var(--red); border-color: rgba(248,113,113,.4); }
+#tag-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ── Snippet Grid ────────────────────────────────────── */
+#snippets-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 22px;
+}
+.section-title { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+  gap: 20px;
+}
+
+/* ── Snippet Card ────────────────────────────────────── */
+.snippet-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 13px; overflow: hidden;
+  transition: transform .25s, border-color .25s, box-shadow .25s;
+  animation: fadeUp .4s ease-out backwards;
+}
+.snippet-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0,245,228,.3);
+  box-shadow: 0 14px 36px rgba(0,0,0,.5), 0 0 0 1px rgba(0,245,228,.08);
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.card-head {
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--card2), var(--card));
+}
+.card-file {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted2); display: flex; align-items: center; gap: 6px;
+  margin-bottom: 8px;
+}
+.card-actions { margin-left: auto; display: flex; gap: 4px; }
+.icon-btn {
+  background: transparent; border: none;
+  border-radius: 7px; padding: 6px;
+  color: var(--muted2); cursor: pointer;
+  transition: all .15s; display: grid; place-items: center;
+}
+.icon-btn:hover { background: var(--card2); color: var(--fg); }
+.icon-btn.danger:hover { color: var(--red); }
+.icon-btn.copied { color: var(--green); }
+
+.card-title {
+  font-size: 17px; font-weight: 700;
+  letter-spacing: -.01em; margin-bottom: 6px;
+}
+.card-desc { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
+.card-tags {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px;
+}
+
+/* ── Badges & Tags ───────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--card2);
+  color: var(--muted); letter-spacing: .04em; text-transform: uppercase;
+}
+.badge-cyan   { color:var(--cyan);   border-color:rgba(0,245,228,.28);  background:rgba(0,245,228,.07); }
+.badge-violet { color:var(--violet); border-color:rgba(168,85,247,.28); background:rgba(168,85,247,.07); }
+.badge-green  { color:var(--green);  border-color:rgba(52,211,153,.28); background:rgba(52,211,153,.07); }
+.badge-orange { color:var(--orange); border-color:rgba(251,146,60,.28); background:rgba(251,146,60,.07); }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 7px;
+  font-family: var(--font-mono); font-size: 10.5px;
+  background: var(--card2); border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; transition: all .14s;
+}
+.tag:hover     { color:var(--cyan);   border-color:rgba(0,245,228,.3); }
+.tag.active    { color:var(--cyan);   border-color:rgba(0,245,228,.4); background:rgba(0,245,228,.09); }
+.tag.custom    { color:var(--violet); border-color:rgba(168,85,247,.3); }
+.tag.custom:hover { color:var(--magenta); }
+
+/* ── Code block ──────────────────────────────────────── */
+.code-wrap {
+  position: relative; overflow: hidden;
+  max-height: 340px;
+}
+.code-block {
+  background: var(--bg2);
+  padding: 15px 18px;
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65;
+  color: var(--fg); overflow: auto; tab-size: 2;
+  white-space: pre; max-height: 340px;
+  border: none; outline: none; display: block;
+}
+/* syntax tokens */
+.k  { color: #c084fc; }   /* keyword */
+.t  { color: #67e8f9; }   /* type */
+.s  { color: #fbbf24; }   /* string */
+.n  { color: #86efac; }   /* number */
+.c  { color: #4a5d75; font-style:italic; }  /* comment */
+.f  { color: #f9a8d4; }   /* function */
+.p  { color: #94a3b8; }   /* preprocessor */
+.op { color: #93c5fd; }   /* operator */
+
+/* ── Empty state ─────────────────────────────────────── */
+#empty {
+  border: 1px dashed var(--border);
+  border-radius: 13px; padding: 70px 24px;
+  text-align: center; color: var(--muted2);
+  grid-column: 1 / -1;
+}
+#empty h3 { font-size: 17px; color: var(--fg); margin-bottom: 8px; }
+#empty p  { font-size: 13px; margin-bottom: 22px; }
+
+/* ── Generic buttons ─────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 15px; border-radius: 9px;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--fg); font-family: var(--font-display);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .18s;
+}
+.btn:hover { border-color:rgba(0,245,228,.35); background:rgba(0,245,228,.05); color:var(--cyan); }
+.btn-cyan {
+  background: linear-gradient(135deg,rgba(0,245,228,.12),rgba(168,85,247,.12));
+  border-color: rgba(0,245,228,.35); color: var(--cyan);
+}
+.btn-cyan:hover { box-shadow: 0 0 22px rgba(0,245,228,.2); }
+.btn-ghost { background:transparent; border-color:transparent; color:var(--muted); }
+.btn-ghost:hover { background:var(--card2); border-color:var(--border); color:var(--fg); }
+
+/* search bar */
+.search-wrap {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 9px; padding: 9px 12px;
+  margin-bottom: 8px; cursor: pointer;
+  transition: border-color .15s;
+}
+.search-wrap:hover { border-color:rgba(0,245,228,.3); }
+.search-wrap span { font-size: 13px; color: var(--muted2); flex: 1; }
+.search-kbd {
+  font-family: var(--font-mono); font-size: 10px; color: var(--muted2);
+  background: var(--card); padding: 2px 6px; border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+/* ── Modal ───────────────────────────────────────────── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 50;
+  background: rgba(6,10,16,.88);
+  backdrop-filter: blur(10px);
+  align-items: flex-start; justify-content: center;
+  padding: 60px 16px 40px; overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  width: 100%; max-width: 730px;
+  background: var(--card); border: 1px solid var(--border2);
+  border-radius: 15px; overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0,0,0,.7);
+  animation: fadeUp .3s ease-out;
+}
+.modal-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg,var(--card2),var(--card));
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-head h2 { font-size: 18px; font-weight: 700; display:flex; align-items:center; gap:9px; }
+.modal-body { padding: 22px; }
+.modal-foot {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  display: flex; justify-content: flex-end; gap: 9px;
+}
+
+/* form fields */
+.field { margin-bottom: 15px; }
+.field label {
+  display: block; margin-bottom: 7px;
+  font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
+}
+.input, .textarea {
+  width: 100%; padding: 10px 14px;
+  border-radius: 9px; border: 1px solid var(--border);
+  background: var(--bg2); color: var(--fg);
+  font-family: var(--font-display); font-size: 13.5px;
+  transition: border-color .14s, box-shadow .14s; outline: none;
+}
+.input:focus, .textarea:focus {
+  border-color: rgba(0,245,228,.45);
+  box-shadow: 0 0 0 3px rgba(0,245,228,.1);
+}
+.input::placeholder, .textarea::placeholder { color: var(--muted2); }
+.textarea {
+  font-family: var(--font-mono); font-size: 12.5px;
+  resize: vertical; line-height: 1.6; tab-size: 2;
+  min-height: 240px;
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+
+/* auto-detect panel */
+#auto-detect {
+  display: none; padding: 13px 16px; border-radius: 10px;
+  background: linear-gradient(135deg,rgba(0,245,228,.05),rgba(168,85,247,.05));
+  border: 1px solid rgba(0,245,228,.18); margin-bottom: 14px;
+}
+#auto-detect.visible { display: block; }
+.detect-head {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--cyan); letter-spacing: .08em;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+.detect-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+
+/* ── Search Modal ────────────────────────────────────── */
+#search-modal {
+  padding-top: 90px;
+}
+.search-modal-inner {
+  max-width: 600px;
+}
+.search-modal-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 18px; border-bottom: 1px solid var(--border);
+}
+.search-modal-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--fg); font-family: var(--font-display); font-size: 15px;
+}
+.search-modal-input::placeholder { color: var(--muted2); }
+.search-results { max-height: 400px; overflow-y: auto; padding: 8px; }
+.search-item {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 11px 13px; border-radius: 9px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--fg); cursor: pointer; text-align: left;
+  transition: background .12s; margin-bottom: 3px;
+  font-family: var(--font-display);
+}
+.search-item:hover { background: var(--card2); }
+.search-item-info { flex: 1; min-width: 0; }
+.search-item-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.search-item-file  { font-family:var(--font-mono); font-size: 11px; color: var(--muted2); }
+.search-empty { padding: 40px; text-align: center; color: var(--muted2); font-size: 13px; }
+
+/* ── Confirm dialog ──────────────────────────────────── */
+#confirm-modal .modal { max-width: 380px; }
+
+/* ── Sidebar bottom info ─────────────────────────────── */
+.sb-info-card {
+  position: absolute; bottom: 22px; left: 14px; right: 14px;
+  padding: 13px 14px; border-radius: 10px;
+  background: linear-gradient(135deg,rgba(0,245,228,.04),rgba(168,85,247,.04));
+  border: 1px solid rgba(0,245,228,.13);
+}
+.sb-info-head {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--cyan); letter-spacing: .08em;
+  text-transform: uppercase; margin-bottom: 7px;
+}
+.sb-info-text { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 900px) {
+  :root { --sidebar-w: 0px; }
+  #sidebar { transform: translateX(-270px); transition: transform .3s; }
+  #sidebar.open { transform: translateX(0); width: 270px; }
+  #main { margin-left: 0; padding: 20px 18px 80px; }
+  .mobile-header {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 54px; background: rgba(13,20,32,.8); backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 16px; z-index: 20;
+  }
+  #main { padding-top: 70px; }
+}
+@media (min-width: 901px) {
+  .mobile-header { display: none !important; }
+}
+
+/* ── SVG icons (inline) ──────────────────────────────── */
+.ico { display:inline-block; vertical-align:middle; flex-shrink:0; }
+
+/* tag custom-input row */
+.tag-input-row { display:flex; gap:8px; margin-bottom:9px; }
+.tag-input-row .input { flex:1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════  SIDEBAR  ═══════════════════ -->
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-icon">⌁</div>
+    <div>
+      <div class="logo-name">CPP <span>ARCHIVE</span></div>
+      <div class="logo-ver">v3.0 · auto-classify</div>
+    </div>
+  </div>
+
+  <button class="btn-primary-sb" onclick="openAdd()">
+    <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    New Snippet
+  </button>
+
+  <div class="search-wrap" onclick="openSearch()">
+    <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a8fac" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Search</span>
+    <span class="search-kbd">⌘K</span>
+  </div>
+
+  <div class="sb-sep"></div>
+  <div class="sb-label">Sections</div>
+
+  <button class="sb-btn active" id="nav-all" onclick="setSection('all')">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    All Snippets <span class="cnt" id="cnt-all">0</span>
+  </button>
+  <button class="sb-btn" id="nav-basics" onclick="setSection('basics')">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3m8 0h3a2 2 0 002-2v-3"/></svg>
+    Basics <span class="cnt" id="cnt-basics">0</span>
+  </button>
+  <button class="sb-btn" id="nav-ds" onclick="setSection('data-structures')">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Data Structures <span class="cnt" id="cnt-ds">0</span>
+  </button>
+  <button class="sb-btn" id="nav-oop" onclick="setSection('oop')">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    OOP <span class="cnt" id="cnt-oop">0</span>
+  </button>
+
+  <div class="sb-info-card">
+    <div class="sb-info-head">✦ Auto-Classify</div>
+    <div class="sb-info-text">Paste C++ code and the engine detects the category and tags automatically.</div>
+  </div>
+</aside>
+
+<!-- mobile header -->
+<div class="mobile-header">
+  <button class="icon-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7a8fac" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <span style="font-weight:700;font-size:14px">CPP <span style="color:var(--cyan)">ARCHIVE</span></span>
+  <button class="icon-btn" style="margin-left:auto" onclick="openAdd()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+</div>
+
+<!-- ═══════════════════  MAIN  ═══════════════════════ -->
+<main id="main">
+
+  <!-- Hero -->
+  <section id="hero">
+    <div class="hero-pill">
+      <div class="hero-dot"></div>
+      SYSTEM ACTIVE · INDEXING C++
+    </div>
+    <h1 class="hero-title">Your personal<br><span class="hl">C++ codex</span></h1>
+    <p class="hero-sub">
+      Write and archive C++ snippets. The engine reads your code and
+      auto-classifies it into <b>Basics</b>, <b>Data Structures</b>, or <b>OOP</b>
+      — and extracts every concept it finds as a tag.
+    </p>
+    <div class="hero-stats">
+      <div><div class="stat-val" id="stat-total" style="color:var(--cyan)">0</div><div class="stat-lbl">Snippets</div></div>
+      <div><div class="stat-val" id="stat-tags" style="color:var(--violet)">0</div><div class="stat-lbl">Unique Tags</div></div>
+      <div><div class="stat-val" style="color:var(--magenta)">3</div><div class="stat-lbl">Categories</div></div>
+    </div>
+  </section>
+
+  <!-- Filter bar -->
+  <div id="filter-bar">
+    <div class="filter-head">
+      <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <span class="filter-title">Filter by Tag</span>
+      <button id="clear-tags-btn" onclick="clearTagFilters()">
+        <svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Clear
+      </button>
+    </div>
+    <div id="tag-chips"></div>
+  </div>
+
+  <!-- Section header -->
+  <div id="snippets-header">
+    <h2 class="section-title" id="section-label">All Snippets</h2>
+    <span class="badge" id="count-badge">0 items</span>
+    <button class="btn btn-cyan" style="margin-left:auto" onclick="openAdd()">
+      <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Snippet
+    </button>
+  </div>
+
+  <!-- Grid -->
+  <div id="grid"></div>
+</main>
+
+<!-- ═══════════════  ADD / EDIT MODAL  ══════════════ -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>
+        <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Snippet
+      </h2>
+      <button class="icon-btn" onclick="closeAdd()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="field">
+          <label>Title *</label>
+          <input class="input" id="f-title" placeholder="e.g. Binary Search"/>
+        </div>
+        <div class="field">
+          <label>Filename</label>
+          <input class="input" id="f-filename" placeholder="binary_search.cpp" style="font-family:var(--font-mono)"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <input class="input" id="f-desc" placeholder="What does this snippet do?"/>
+      </div>
+      <div class="field">
+        <label>C++ Code *</label>
+        <textarea class="textarea" id="f-code" placeholder="#include &lt;iostream&gt;&#10;using namespace std;&#10;&#10;int main() {&#10;  // your code&#10;  return 0;&#10;}" oninput="liveAnalyze()"></textarea>
+      </div>
+
+      <!-- live detection -->
+      <div id="auto-detect">
+        <div class="detect-head">
+          <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Auto-Detected
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+          Primary section: <span id="detect-section" class="badge badge-cyan" style="margin-left:6px"></span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Detected tags:</div>
+        <div class="detect-tags" id="detect-tags"></div>
+      </div>
+
+      <!-- custom tags -->
+      <div class="field">
+        <label>Custom Tags <span style="color:var(--muted2);font-style:normal">(optional)</span></label>
+        <div class="tag-input-row">
+          <input class="input" id="tag-input" placeholder="Add tag and press Enter"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag()}"/>
+          <button class="btn" onclick="addCustomTag()">
+            <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add
+          </button>
+        </div>
+        <div id="custom-tags-list" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeAdd()">Cancel</button>
+      <button class="btn btn-cyan" onclick="saveSnippet()">
+        <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Snippet
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════  SEARCH MODAL  ══════════════════ -->
+<div class="modal-overlay" id="search-modal">
+  <div class="modal search-modal-inner">
+    <div class="search-modal-input-wrap">
+      <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-modal-input" id="search-input" placeholder="Search title, description, code, or tags…" oninput="renderSearch()"/>
+      <span class="search-kbd" style="cursor:pointer" onclick="closeSearch()">ESC</span>
+    </div>
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
+
+<!-- ═══════════════  CONFIRM MODAL  ═════════════════ -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head">
+      <h2 style="color:var(--red)">
+        <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        Delete Snippet
+      </h2>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--muted);line-height:1.6">Are you sure you want to delete <strong id="confirm-name">"..."</strong>? This cannot be undone.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn" id="confirm-ok"
+        style="border-color:rgba(248,113,113,.4);color:var(--red);background:rgba(248,113,113,.08)"
+        onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════  JAVASCRIPT  ════════════════════ -->
+<script>
+// ── State ──────────────────────────────────────────────
+let snippets = [];
+let activeSection = 'all';
+let activeTags = [];
+let pendingDeleteId = null;
+let editingCustomTags = [];
+
+const STORAGE_KEY = 'cpp-archive-v3';
+
+// ── Seed data ──────────────────────────────────────────
+const SEED = [
+  {
+    id:'s1', title:'Vector Reversal',
+    description:'Reverses a vector in-place using two-pointer technique.',
+    filename:'reverse_vec.cpp',
+    code:`#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid reverseVector(vector<int>& v) {\n  int left = 0, right = v.size() - 1;\n  while (left < right) {\n    swap(v[left], v[right]);\n    left++; right--;\n  }\n}\n\nint main() {\n  vector<int> nums = {1, 2, 3, 4, 5};\n  reverseVector(nums);\n  for (int n : nums) cout << n << " ";\n  return 0;\n}`,
+    section:'basics', tags:['arrays','loops','functions','io'], customTags:['two-pointer'],
+    createdAt: Date.now()-86400000*3
+  },
+  {
+    id:'s2', title:'Singly Linked List',
+    description:'Linked list with insert at head and traversal.',
+    filename:'linked_list.cpp',
+    code:`#include <iostream>\nusing namespace std;\n\nstruct Node {\n  int data;\n  Node* next;\n  Node(int x) : data(x), next(nullptr) {}\n};\n\nclass LinkedList {\n  Node* head;\npublic:\n  LinkedList() : head(nullptr) {}\n\n  void insert(int val) {\n    Node* n = new Node(val);\n    n->next = head;\n    head = n;\n  }\n\n  void print() {\n    Node* cur = head;\n    while (cur) {\n      cout << cur->data << " -> ";\n      cur = cur->next;\n    }\n    cout << "null\\n";\n  }\n};`,
+    section:'data-structures', tags:['linked-list','class','pointers','loops'], customTags:[],
+    createdAt: Date.now()-86400000*2
+  },
+  {
+    id:'s3', title:'Shape Polymorphism',
+    description:'Virtual functions and inheritance with a Shape hierarchy.',
+    filename:'shapes.cpp',
+    code:`#include <iostream>\nusing namespace std;\n\nclass Shape {\npublic:\n  virtual double area() const = 0;\n  virtual ~Shape() {}\n};\n\nclass Circle : public Shape {\n  double r;\npublic:\n  Circle(double radius) : r(radius) {}\n  double area() const override {\n    return 3.14159 * r * r;\n  }\n};\n\nclass Square : public Shape {\n  double s;\npublic:\n  Square(double side) : s(side) {}\n  double area() const override { return s * s; }\n};`,
+    section:'oop', tags:['class','inheritance','polymorphism','destructor'], customTags:['abstract-class'],
+    createdAt: Date.now()-86400000
+  }
+];
+
+// ── Persistence ────────────────────────────────────────
+function load() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY);
+    if (d) { snippets = JSON.parse(d); return; }
+  } catch(e){}
+  snippets = JSON.parse(JSON.stringify(SEED));
+}
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snippets)); } catch(e){}
+}
+
+// ── Category rules ─────────────────────────────────────
+const RULES = {
+  'data-structures': { label:'Data Structures', weight:3, badge:'badge-violet', rules:[
+    { pat:[/struct\s+Node/i,/class\s+Node/i,/->next/,/->prev/,/LinkedList/i], tag:'linked-list', sc:5 },
+    { pat:[/stack</i,/std::stack/i,/class\s+Stack/i], tag:'stack', sc:5 },
+    { pat:[/queue</i,/std::queue/i,/enqueue/i,/dequeue/i], tag:'queue', sc:5 },
+    { pat:[/priority_queue/i], tag:'priority-queue', sc:5 },
+    { pat:[/struct\s+TreeNode/i,/class\s+Tree/i,/->left/,/->right/,/BST/i,/BinaryTree/i], tag:'tree', sc:5 },
+    { pat:[/Graph/i,/adjacency/i,/\bBFS\b/,/\bDFS\b/,/dijkstra/i], tag:'graph', sc:5 },
+    { pat:[/unordered_map/,/std::map/,/HashMap/i], tag:'hash-map', sc:4 },
+    { pat:[/unordered_set/,/std::set/], tag:'set', sc:3 },
+    { pat:[/std::deque/,/deque</], tag:'deque', sc:4 },
+  ]},
+  'oop': { label:'OOP', weight:2, badge:'badge-green', rules:[
+    { pat:[/:\s*public\s+\w+/,/:\s*private\s+\w+/,/:\s*protected\s+\w+/], tag:'inheritance', sc:5 },
+    { pat:[/\bvirtual\s+/,/\boverride\b/,/\babstract\b/], tag:'polymorphism', sc:5 },
+    { pat:[/template\s*</], tag:'templates', sc:5 },
+    { pat:[/operator\s*[+\-*\/=<>]/,/operator\s*\(\)/], tag:'operator-overload', sc:4 },
+    { pat:[/class\s+\w+[\s:{]/], tag:'class', sc:3 },
+    { pat:[/public:/,/private:/,/protected:/], tag:'encapsulation', sc:2 },
+    { pat:[/~\w+\s*\(/], tag:'destructor', sc:3 },
+    { pat:[/\bstatic\s+/], tag:'static', sc:2 },
+    { pat:[/namespace\s+/], tag:'namespace', sc:2 },
+    { pat:[/\bfriend\s+/], tag:'friend', sc:3 },
+  ]},
+  'basics': { label:'Basics', weight:1, badge:'badge-cyan', rules:[
+    { pat:[/\bint\s+\w+\s*\[/,/vector</,/\w+\[\d+\]/], tag:'arrays', sc:3 },
+    { pat:[/\bfor\s*\(/,/\bwhile\s*\(/,/\bdo\s*\{/], tag:'loops', sc:3 },
+    { pat:[/\bif\s*\(/,/\bswitch\s*\(/,/\bcase\s+/], tag:'conditionals', sc:3 },
+    { pat:[/\breturn\s+/], tag:'functions', sc:2 },
+    { pat:[/\*\w+/,/&\w+/,/nullptr/,/\bNULL\b/], tag:'pointers', sc:4 },
+    { pat:[/\bstring\s+/,/std::string/,/\bchar\s/], tag:'strings', sc:3 },
+    { pat:[/cin\s*>>/,/cout\s*<</,/getline/], tag:'io', sc:2 },
+    { pat:[/\blambda\b/,/\[\s*\]\s*\(/], tag:'lambdas', sc:4 },
+    { pat:[/\btry\s*\{/,/\bcatch\s*\(/,/\bthrow\s+/], tag:'exceptions', sc:4 },
+    { pat:[/#include/,/#define/], tag:'preprocessor', sc:1 },
+  ]}
+};
+
+function analyzeCode(code) {
+  const scores = {'basics':0,'oop':0,'data-structures':0};
+  const tags = new Set();
+  for (const [sid, def] of Object.entries(RULES)) {
+    for (const rule of def.rules) {
+      if (rule.pat.some(p => p.test(code))) {
+        scores[sid] += rule.sc * def.weight;
+        tags.add(rule.tag);
+      }
+    }
+  }
+  // recursion detection
+  const m = code.match(/\b([a-zA-Z_]\w*)\s*\([^)]*\)\s*\{/);
+  if (m) {
+    const calls = (code.match(new RegExp('\\b'+m[1]+'\\s*\\(','g')) || []).length;
+    if (calls >= 2) tags.add('recursion');
+  }
+  let primary = 'basics', max = 0;
+  for (const [s,v] of Object.entries(scores)) if (v > max){ max=v; primary=s; }
+  return { primary, tags: [...tags] };
+}
+
+// ── Syntax highlight ───────────────────────────────────
+const KW = ['if','else','for','while','do','switch','case','break','continue','return',
+             'class','struct','public','private','protected','virtual','override','static',
+             'const','new','delete','this','template','typename','namespace','using',
+             'try','catch','throw','operator','friend','inline','explicit','mutable',
+             'volatile','enum','typedef','sizeof','nullptr','true','false'];
+const TY = ['int','char','float','double','void','bool','long','short','unsigned','signed',
+             'auto','string','vector','map','set','queue','stack','pair','size_t','std',
+             'deque','list','array','tuple'];
+
+function hl(raw) {
+  let s = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // protect comments
+  s = s.replace(/\/\/[^\n]*/g, m=>`\x01${m}\x02`);
+  s = s.replace(/\/\*[\s\S]*?\*\//g, m=>`\x01${m}\x02`);
+  // strings
+  s = s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, m=>`\x03${m}\x04`);
+  // preprocessor
+  s = s.replace(/(^#\w+[^\n]*)/gm, `\x05$1\x06`);
+  // numbers
+  s = s.replace(/\b(\d+\.?\d*[uUlLfF]*)\b/g,'<span class="n">$1</span>');
+  // keywords
+  KW.forEach(k=>{ s=s.replace(new RegExp(`\\b${k}\\b`,'g'),`<span class="k">${k}</span>`); });
+  // types
+  TY.forEach(t=>{ s=s.replace(new RegExp(`\\b${t}\\b`,'g'),`<span class="t">${t}</span>`); });
+  // functions
+  s = s.replace(/\b([a-zA-Z_]\w*)\s*\(/g,(m,name)=>{
+    if(KW.includes(name)||TY.includes(name)) return m;
+    return `<span class="f">${name}</span>(`;
+  });
+  // restore
+  s = s.replace(/\x03([\s\S]*?)\x04/g,'<span class="s">$1</span>');
+  s = s.replace(/\x01([\s\S]*?)\x02/g,'<span class="c">$1</span>');
+  s = s.replace(/\x05([\s\S]*?)\x06/g,'<span class="p">$1</span>');
+  return s;
+}
+
+// ── Render helpers ─────────────────────────────────────
+function sectionLabel(id) { return (RULES[id]||{label:'All'}).label; }
+function sectionBadge(id) { return (RULES[id]||{badge:'badge-cyan'}).badge; }
+
+function allTags() {
+  const s = new Set();
+  snippets.forEach(sn => {
+    sn.tags.forEach(t=>s.add(t));
+    (sn.customTags||[]).forEach(t=>s.add(t));
+  });
+  return [...s].sort();
+}
+
+function filtered() {
+  return snippets.filter(sn => {
+    if (activeSection !== 'all' && sn.section !== activeSection) return false;
+    if (activeTags.length > 0) {
+      const all = [...sn.tags, ...(sn.customTags||[])];
+      if (!activeTags.every(t=>all.includes(t))) return false;
+    }
+    return true;
+  });
+}
+
+// ── Render tag filter bar ──────────────────────────────
+function renderTagBar() {
+  const tags = allTags();
+  const el = document.getElementById('tag-chips');
+  el.innerHTML = '';
+  tags.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tag' + (activeTags.includes(t)?' active':'');
+    btn.textContent = t;
+    btn.onclick = () => toggleTagFilter(t);
+    el.appendChild(btn);
+  });
+  const clearBtn = document.getElementById('clear-tags-btn');
+  clearBtn.style.display = activeTags.length > 0 ? 'inline-flex' : 'none';
+  const fb = document.getElementById('filter-bar');
+  fb.style.display = tags.length > 0 ? 'block' : 'none';
+}
+
+function toggleTagFilter(t) {
+  activeTags = activeTags.includes(t) ? activeTags.filter(x=>x!==t) : [...activeTags,t];
+  renderAll();
+}
+function clearTagFilters() { activeTags=[]; renderAll(); }
+
+// ── Render cards ───────────────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const list = filtered();
+
+  document.getElementById('section-label').textContent =
+    activeSection==='all' ? 'All Snippets' : sectionLabel(activeSection);
+  document.getElementById('count-badge').textContent =
+    `${list.length} ${list.length===1?'item':'items'}`;
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div id="empty">
+      <div style="font-size:28px;margin-bottom:12px;opacity:.4">⊚</div>
+      <h3>No snippets here yet</h3>
+      <p>${activeTags.length?'Try removing some tag filters':'Add your first C++ snippet'}</p>
+      ${!activeTags.length?`<button class="btn btn-cyan" onclick="openAdd()">
+        <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Snippet</button>`:''}
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = '';
+  list.forEach((sn, i) => {
+    const allT = [...sn.tags, ...(sn.customTags||[])];
+    const card = document.createElement('div');
+    card.className = 'snippet-card';
+    card.style.animationDelay = `${i*55}ms`;
+
+    const tagsHtml = [
+      `<span class="badge ${sectionBadge(sn.section)}"># ${sectionLabel(sn.section)}</span>`,
+      ...allT.slice(0,7).map(t => {
+        const isCust = (sn.customTags||[]).includes(t);
+        return `<button class="tag ${isCust?'custom':''}" onclick="toggleTagFilter('${t}')">${isCust?'⊹ ':''}${t}</button>`;
+      })
+    ].join('');
+
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="card-file">
+          <svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          ${sn.filename}
+          <span class="card-actions">
+            <button class="icon-btn" id="copy-${sn.id}" title="Copy code" onclick="copyCode('${sn.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+            <button class="icon-btn danger" title="Delete" onclick="askDelete('${sn.id}','${sn.title.replace(/'/g,"\\'")}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </button>
+          </span>
+        </div>
+        <div class="card-title">${sn.title}</div>
+        <div class="card-desc">${sn.description}</div>
+        <div class="card-tags">${tagsHtml}</div>
+      </div>
+      <div class="code-wrap">
+        <pre class="code-block"><code>${hl(sn.code)}</code></pre>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ── Render sidebar counts ──────────────────────────────
+function renderCounts() {
+  const counts = {basics:0,'data-structures':0,oop:0};
+  snippets.forEach(s=>{ counts[s.section]=(counts[s.section]||0)+1; });
+  document.getElementById('cnt-all').textContent = snippets.length;
+  document.getElementById('cnt-basics').textContent = counts.basics;
+  document.getElementById('cnt-ds').textContent = counts['data-structures'];
+  document.getElementById('cnt-oop').textContent = counts.oop;
+  document.getElementById('stat-total').textContent = snippets.length;
+  document.getElementById('stat-tags').textContent = allTags().length;
+}
+
+function renderAll() {
+  renderCounts();
+  renderTagBar();
+  renderGrid();
+  // sidebar active state
+  ['all','basics','data-structures','oop'].forEach(id=>{
+    const el = document.getElementById('nav-'+(id==='data-structures'?'ds':id));
+    if(el) el.classList.toggle('active', activeSection===id);
+  });
+}
+
+// ── Section navigation ─────────────────────────────────
+function setSection(id) {
+  activeSection = id;
+  activeTags = [];
+  renderAll();
+}
+
+// ── Copy code ──────────────────────────────────────────
+async function copyCode(id) {
+  const sn = snippets.find(s=>s.id===id);
+  if (!sn) return;
+  try {
+    await navigator.clipboard.writeText(sn.code);
+  } catch(e) {
+    // fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = sn.code;
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  const btn = document.getElementById('copy-'+id);
+  if (!btn) return;
+  btn.classList.add('copied');
+  btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+  setTimeout(()=>{
+    btn.classList.remove('copied');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+  }, 1500);
+}
+
+// ── Delete ─────────────────────────────────────────────
+function askDelete(id, title) {
+  pendingDeleteId = id;
+  document.getElementById('confirm-name').textContent = `"${title}"`;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirm() {
+  pendingDeleteId = null;
+  document.getElementById('confirm-modal').classList.remove('open');
+}
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+  snippets = snippets.filter(s=>s.id!==pendingDeleteId);
+  save(); renderAll(); closeConfirm();
+}
+
+// ── Add modal ──────────────────────────────────────────
+function openAdd() {
+  editingCustomTags = [];
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-filename').value = '';
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-code').value = '';
+  document.getElementById('tag-input').value = '';
+  document.getElementById('custom-tags-list').innerHTML = '';
+  document.getElementById('auto-detect').classList.remove('visible');
+  document.getElementById('add-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('f-title').focus(), 80);
+}
+function closeAdd() {
+  document.getElementById('add-modal').classList.remove('open');
+}
+
+// Live analysis
+function liveAnalyze() {
+  const code = document.getElementById('f-code').value;
+  const panel = document.getElementById('auto-detect');
+  if (code.trim().length < 15) { panel.classList.remove('visible'); return; }
+  const r = analyzeCode(code);
+  const def = RULES[r.primary];
+  document.getElementById('detect-section').className = `badge ${def.badge}`;
+  document.getElementById('detect-section').textContent = def.label;
+  const tc = document.getElementById('detect-tags');
+  tc.innerHTML = r.tags.length === 0
+    ? '<span style="font-size:11px;color:var(--muted2)">none yet</span>'
+    : r.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  panel.classList.add('visible');
+}
+
+// Custom tags
+function addCustomTag() {
+  const inp = document.getElementById('tag-input');
+  const t = inp.value.trim().toLowerCase().replace(/\s+/g,'-');
+  if (!t || editingCustomTags.includes(t)) { inp.value=''; return; }
+  editingCustomTags.push(t);
+  inp.value = '';
+  renderCustomTagList();
+}
+function removeCustomTag(t) {
+  editingCustomTags = editingCustomTags.filter(x=>x!==t);
+  renderCustomTagList();
+}
+function renderCustomTagList() {
+  document.getElementById('custom-tags-list').innerHTML =
+    editingCustomTags.map(t=>`
+      <button class="tag custom" onclick="removeCustomTag('${t}')">
+        <svg class="ico" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        ${t}
+      </button>`).join('');
+}
+
+function saveSnippet() {
+  const title = document.getElementById('f-title').value.trim();
+  const code  = document.getElementById('f-code').value.trim();
+  if (!title || !code) {
+    alert('Title and Code are required.');
+    return;
+  }
+  const r = analyzeCode(code);
+  const filename = document.getElementById('f-filename').value.trim()
+    || title.toLowerCase().replace(/[^a-z0-9]+/g,'_')+'.cpp';
+
+  const sn = {
+    id: 'sn_'+Date.now(),
+    title,
+    description: document.getElementById('f-desc').value.trim() || 'No description provided.',
+    filename,
+    code,
+    section: r.primary,
+    tags: r.tags,
+    customTags: [...editingCustomTags],
+    createdAt: Date.now()
+  };
+  snippets.unshift(sn);
+  save(); renderAll(); closeAdd();
+}
+
+// ── Search ─────────────────────────────────────────────
+function openSearch() {
+  document.getElementById('search-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('search-input').focus(), 60);
+  renderSearch();
+}
+function closeSearch() {
+  document.getElementById('search-modal').classList.remove('open');
+  document.getElementById('search-input').value = '';
+}
+function renderSearch() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  const pool = q ? snippets.filter(s =>
+    s.title.toLowerCase().includes(q) ||
+    s.description.toLowerCase().includes(q) ||
+    s.code.toLowerCase().includes(q) ||
+    s.tags.some(t=>t.includes(q)) ||
+    (s.customTags||[]).some(t=>t.includes(q))
+  ) : snippets.slice(0,10);
+
+  const el = document.getElementById('search-results');
+  if (pool.length === 0) {
+    el.innerHTML = `<div class="search-empty">No matches found</div>`; return;
+  }
+  el.innerHTML = pool.map(s=>`
+    <button class="search-item" onclick="jumpTo('${s.id}')">
+      <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div class="search-item-info">
+        <div class="search-item-title">${s.title}</div>
+        <div class="search-item-file">${s.filename}</div>
+      </div>
+      <span class="badge ${sectionBadge(s.section)}">${sectionLabel(s.section)}</span>
+      <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>`).join('');
+}
+function jumpTo(id) {
+  const sn = snippets.find(s=>s.id===id);
+  if (sn) { activeSection = sn.section; activeTags = []; renderAll(); }
+  closeSearch();
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.metaKey||e.ctrlKey) && e.key==='k') {
+    e.preventDefault();
+    document.getElementById('search-modal').classList.contains('open')
+      ? closeSearch() : openSearch();
+  }
+  if (e.key==='Escape') {
+    closeSearch(); closeAdd(); closeConfirm();
+  }
+});
+
+// Close modals on overlay click
+['add-modal','search-modal','confirm-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', function(e){
+    if (e.target===this) {
+      this.classList.remove('open');
+    }
+  });
+});
+
+// ── Init ───────────────────────────────────────────────
+load();
+renderAll();
+</script>
+</body>
+</html>
