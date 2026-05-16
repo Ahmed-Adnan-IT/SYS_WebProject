@@ -3,235 +3,48 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>C++ Archive · v3.3 · Small UX</title>
+<title>C++ Archive · v4.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #060a10; --bg2: #090d15; --card: #0d1420; --card2: #101828;
-  --border: #1a2236; --border2: #22304a; --fg: #e8f0ff;
-  --muted: #7a8fac; --muted2: #4a5d75;
-  --cyan: #00f5e4; --cyan-dim: rgba(0,245,228,.12); --cyan-glow: rgba(0,245,228,.25);
-  --violet: #a855f7; --violet-dim: rgba(168,85,247,.12);
-  --magenta: #f472b6; --green: #34d399; --orange: #fb923c; --red: #f87171;
-  --sidebar-w: 270px;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-display: 'Space Grotesk', sans-serif;
-}
-
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--fg); font-family: var(--font-display); min-height: 100vh; overflow-x: hidden; }
-body::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(26,34,54,.55) 1px, transparent 1px), linear-gradient(90deg, rgba(26,34,54,.55) 1px, transparent 1px); background-size: 90px 90px; }
-body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 70% 45% at 85% 0%, rgba(0,245,228,.055) 0%, transparent 55%), radial-gradient(ellipse 55% 50% at 5% 100%, rgba(168,85,247,.045) 0%, transparent 55%); }
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--cyan-glow); }
-
-#sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: rgba(13,20,32,.75); backdrop-filter: blur(22px); border-right: 1px solid var(--border); padding: 26px 16px 120px; z-index: 30; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-#main { margin-left: var(--sidebar-w); padding: 48px 52px 100px; max-width: 1420px; position: relative; z-index: 1; }
-
-.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
-.logo-icon { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, rgba(0,245,228,.18), rgba(168,85,247,.18)); border: 1px solid rgba(0,245,228,.3); display: grid; place-items: center; font-size: 18px; }
-.logo-name { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
-.logo-name span { color: var(--cyan); }
-.logo-ver { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); margin-top: 2px; }
-
-.sb-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 13px; border-radius: 9px; border: 1px solid transparent; background: transparent; color: var(--muted); font-family: var(--font-display); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .18s; text-align: left; }
-.sb-btn svg { flex-shrink: 0; }
-.sb-btn:hover { background: var(--card2); color: var(--fg); }
-.sb-btn.active { background: var(--cyan-dim); border-color: rgba(0,245,228,.22); color: var(--cyan); }
-.sb-btn .cnt { margin-left: auto; font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; border-radius: 5px; background: var(--card2); color: var(--muted2); }
-.sb-btn.active .cnt { background: rgba(0,245,228,.15); color: var(--cyan); }
-
-/* ─── KEYBOARD SHORTCUT BADGE — added by Omar ─── */
-.sb-btn .kbd-hint {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--bg2);
-  color: var(--muted2);
-  border: 1px solid var(--border);
-  margin-right: 4px;
-}
-
-.sb-sep { height: 1px; background: var(--border); margin: 10px 0; }
-.sb-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: .12em; padding: 0 13px; text-transform: uppercase; margin-bottom: 4px; }
-.btn-primary-sb { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; border-radius: 9px; border: 1px solid rgba(0,245,228,.3); background: linear-gradient(135deg, rgba(0,245,228,.1), rgba(168,85,247,.1)); color: var(--cyan); font-family: var(--font-display); font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; margin-bottom: 8px; }
-.btn-primary-sb:hover { box-shadow: 0 0 22px rgba(0,245,228,.2); }
-
-#hero { margin-bottom: 52px; }
-.hero-pill { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; color: var(--cyan); letter-spacing: .14em; margin-bottom: 18px; }
-.hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 9px var(--cyan); animation: pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.35)} }
-.hero-title { font-size: clamp(38px,5.5vw,68px); font-weight: 800; line-height: 1.05; letter-spacing: -.03em; background: linear-gradient(175deg, var(--fg) 40%, var(--cyan) 120%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 18px; }
-.hero-title .hl { -webkit-text-fill-color: var(--cyan); }
-.hero-sub { font-size: 15px; color: var(--muted); max-width: 620px; line-height: 1.65; margin-bottom: 36px; }
-.hero-sub b { color: #e8f0ff; font-weight: 500; }
-.hero-stats { display: flex; gap: 36px; padding-top: 28px; border-top: 1px solid var(--border); }
-.stat-val { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1; }
-.stat-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); letter-spacing: .12em; text-transform: uppercase; margin-top: 7px; }
-
-#filter-bar { margin-bottom: 30px; padding: 15px 18px; border-radius: 12px; background: rgba(13,20,32,.6); border: 1px solid var(--border); }
-.filter-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.filter-title { font-family: var(--font-mono); font-size: 10px; color: var(--cyan); letter-spacing: .1em; text-transform: uppercase; }
-#clear-tags-btn { margin-left: auto; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-family: var(--font-display); font-size: 11px; padding: 3px 10px; cursor: pointer; display: none; align-items: center; gap: 5px; transition: all .15s; }
-#clear-tags-btn:hover { color: var(--red); border-color: rgba(248,113,113,.4); }
-#tag-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-
-#snippets-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
-.section-title { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
-#grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(370px, 1fr)); gap: 20px; }
-
-.snippet-card { background: var(--card); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; transition: transform .25s, border-color .25s, box-shadow .25s; animation: fadeUp .4s ease-out backwards; }
-.snippet-card:hover { transform: translateY(-3px); border-color: rgba(0,245,228,.3); box-shadow: 0 14px 36px rgba(0,0,0,.5), 0 0 0 1px rgba(0,245,228,.08); }
-@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-
-.card-head { padding: 16px 18px 14px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--card2), var(--card)); }
-.card-file { font-family: var(--font-mono); font-size: 11px; color: var(--muted2); display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-.card-actions { margin-left: auto; display: flex; gap: 4px; }
-.icon-btn { background: transparent; border: none; border-radius: 7px; padding: 6px; color: var(--muted2); cursor: pointer; transition: all .15s; display: grid; place-items: center; }
-.icon-btn:hover { background: var(--card2); color: var(--fg); }
-.icon-btn.danger:hover { color: var(--red); }
-.icon-btn.copied { color: var(--green); }
-
-.card-title { font-size: 17px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 6px; }
-.card-desc { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
-.card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
-
-/* ─── CARD META ROW (date + lines) — added by Omar ─── */
-.card-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--border);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--muted2);
-}
-.card-meta-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.card-meta-item svg {
-  width: 11px;
-  height: 11px;
-  opacity: 0.7;
-}
-.card-meta-divider {
-  width: 1px;
-  height: 10px;
-  background: var(--border);
-}
-.lines-badge {
-  color: var(--cyan);
-  font-weight: 600;
-}
-
-.badge { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); background: var(--card2); color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
-.badge-cyan { color: var(--cyan); border-color: rgba(0,245,228,.28); background: rgba(0,245,228,.07); }
-.badge-violet { color: var(--violet); border-color: rgba(168,85,247,.28); background: rgba(168,85,247,.07); }
-.badge-green { color: var(--green); border-color: rgba(52,211,153,.28); background: rgba(52,211,153,.07); }
-.badge-orange { color: var(--orange); border-color: rgba(251,146,60,.28); background: rgba(251,146,60,.07); }
-
-.tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 7px; font-family: var(--font-mono); font-size: 10.5px; background: var(--card2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all .14s; }
-.tag:hover { color: var(--cyan); border-color: rgba(0,245,228,.3); }
-.tag.active { color: var(--cyan); border-color: rgba(0,245,228,.4); background: rgba(0,245,228,.09); }
-.tag.custom { color: var(--violet); border-color: rgba(168,85,247,.3); }
-
-.code-wrap { position: relative; overflow: hidden; max-height: 340px; }
-.code-block { background: var(--bg2); padding: 15px 18px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65; color: var(--fg); overflow: auto; tab-size: 2; white-space: pre; max-height: 340px; border: none; outline: none; display: block; }
-.k{color:#c084fc;} .t{color:#67e8f9;} .s{color:#fbbf24;} .n{color:#86efac;} .c{color:#4a5d75;font-style:italic;} .f{color:#f9a8d4;} .p{color:#94a3b8;}
-
-#empty { border: 1px dashed var(--border); border-radius: 13px; padding: 70px 24px; text-align: center; color: var(--muted2); grid-column: 1 / -1; }
-#empty h3 { font-size: 17px; color: var(--fg); margin-bottom: 8px; }
-#empty p { font-size: 13px; margin-bottom: 22px; }
-
-.btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 15px; border-radius: 9px; border: 1px solid var(--border); background: var(--card); color: var(--fg); font-family: var(--font-display); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .18s; }
-.btn:hover { border-color:rgba(0,245,228,.35); background:rgba(0,245,228,.05); color:var(--cyan); }
-.btn-cyan { background: linear-gradient(135deg,rgba(0,245,228,.12),rgba(168,85,247,.12)); border-color: rgba(0,245,228,.35); color: var(--cyan); }
-.btn-ghost { background: transparent; border-color: transparent; color: var(--muted); }
-.btn-ghost:hover { background: var(--card2); border-color: var(--border); color: var(--fg); }
-
-.search-wrap { display: flex; align-items: center; gap: 9px; background: var(--card2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; margin-bottom: 8px; cursor: pointer; transition: border-color .15s; }
-.search-wrap:hover { border-color: rgba(0,245,228,.3); }
-.search-wrap span { font-size: 13px; color: var(--muted2); flex: 1; }
-.search-kbd { font-family: var(--font-mono); font-size: 10px; color: var(--muted2); background: var(--card); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
-
-.modal-overlay { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(6,10,16,.88); backdrop-filter: blur(10px); align-items: flex-start; justify-content: center; padding: 60px 16px 40px; overflow-y: auto; }
-.modal-overlay.open { display: flex; }
-.modal { width: 100%; max-width: 730px; background: var(--card); border: 1px solid var(--border2); border-radius: 15px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,.7); animation: fadeUp .3s ease-out; }
-.modal-head { padding: 18px 22px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg,var(--card2),var(--card)); display: flex; align-items: center; justify-content: space-between; }
-.modal-head h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 9px; }
-.modal-body { padding: 22px; }
-.modal-foot { padding: 14px 22px; border-top: 1px solid var(--border); background: var(--bg2); display: flex; justify-content: flex-end; gap: 9px; }
-
-.field { margin-bottom: 15px; }
-.field label { display: block; margin-bottom: 7px; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
-.input, .textarea { width: 100%; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg2); color: var(--fg); font-family: var(--font-display); font-size: 13.5px; outline: none; }
-.input:focus, .textarea:focus { border-color: rgba(0,245,228,.45); box-shadow: 0 0 0 3px rgba(0,245,228,.1); }
-.textarea { font-family: var(--font-mono); font-size: 12.5px; resize: vertical; min-height: 240px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
-
-#auto-detect { display: none; padding: 13px 16px; border-radius: 10px; background: linear-gradient(135deg,rgba(0,245,228,.05),rgba(168,85,247,.05)); border: 1px solid rgba(0,245,228,.18); margin-bottom: 14px; }
-#auto-detect.visible { display: block; }
-.detect-head { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 10.5px; color: var(--cyan); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
-.detect-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
-
-#search-modal { padding-top: 90px; }
-.search-modal-input-wrap { display: flex; align-items: center; gap: 10px; padding: 15px 18px; border-bottom: 1px solid var(--border); }
-.search-modal-input { flex: 1; background: transparent; border: none; outline: none; color: var(--fg); font-family: var(--font-display); font-size: 15px; }
-.search-results { max-height: 400px; overflow-y: auto; padding: 8px; }
-.search-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 13px; border-radius: 9px; border: 1px solid transparent; background: transparent; color: var(--fg); cursor: pointer; text-align: left; margin-bottom: 3px; font-family: var(--font-display); }
-.search-item:hover { background: var(--card2); }
-.search-item-info { flex: 1; min-width: 0; }
-.search-item-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-.search-item-file { font-family: var(--font-mono); font-size: 11px; color: var(--muted2); }
-.search-empty { padding: 40px; text-align: center; color: var(--muted2); font-size: 13px; }
-
-#confirm-modal .modal { max-width: 380px; }
-
-.sb-info-card { position: absolute; bottom: 22px; left: 14px; right: 14px; padding: 13px 14px; border-radius: 10px; background: linear-gradient(135deg,rgba(0,245,228,.04),rgba(168,85,247,.04)); border: 1px solid rgba(0,245,228,.13); }
-.sb-info-head { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--cyan); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 7px; }
-.sb-info-text { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
-
-@media (max-width: 900px) {
-  :root { --sidebar-w: 0px; }
-  #sidebar { transform: translateX(-270px); transition: transform .3s; }
-  #sidebar.open { transform: translateX(0); width: 270px; }
-  #main { margin-left: 0; padding: 20px 18px 80px; padding-top: 70px; }
-  .mobile-header { position: fixed; top: 0; left: 0; right: 0; height: 54px; background: rgba(13,20,32,.8); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; padding: 0 16px; z-index: 20; }
-}
-@media (min-width: 901px) { .mobile-header { display: none !important; } }
-
-.ico { display: inline-block; vertical-align: middle; flex-shrink: 0; }
-.tag-input-row { display: flex; gap: 8px; margin-bottom: 9px; }
-.tag-input-row .input { flex: 1; }
-</style>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
+<!-- Animated background layers -->
+<div id="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+</div>
+<div id="bg-scanline"></div>
+
 <aside id="sidebar">
   <div class="logo">
-    <div class="logo-icon">⌁</div>
+    <div class="logo-icon">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="C++ logo">
+        <rect width="100" height="100" rx="10" fill="#000"/>
+        <path d="M 44 32 a 20 20 0 1 0 0 36" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <g stroke="#fff" stroke-width="7" stroke-linecap="round">
+          <line x1="56" y1="50" x2="74" y2="50"/>
+          <line x1="65" y1="41" x2="65" y2="59"/>
+          <line x1="78" y1="50" x2="96" y2="50"/>
+          <line x1="87" y1="41" x2="87" y2="59"/>
+        </g>
+      </svg>
+    </div>
     <div>
       <div class="logo-name">CPP <span>ARCHIVE</span></div>
-      <div class="logo-ver">v3.3 · small ux</div>
+      <div class="logo-ver">v5.0 · classified</div>
     </div>
   </div>
 
-  <button class="btn-primary-sb" onclick="openAdd()">
+  <button class="btn-primary-sb" data-action="add">
     <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     New Snippet
   </button>
 
-  <div class="search-wrap" onclick="openSearch()">
+  <div class="search-wrap" id="open-search">
     <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a8fac" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span>Search</span>
     <span class="search-kbd">⌘K</span>
@@ -240,44 +53,87 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events
   <div class="sb-sep"></div>
   <div class="sb-label">Sections</div>
 
-  <!-- ─── Keyboard hints added next to each section — by Omar ─── -->
-  <button class="sb-btn active" id="nav-all" onclick="setSection('all')">
+  <button class="sb-btn active" id="nav-all">
     <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
     All Snippets
     <span class="kbd-hint">1</span>
     <span class="cnt" id="cnt-all">0</span>
   </button>
-  <button class="sb-btn" id="nav-basics" onclick="setSection('basics')">
-    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3m8 0h3a2 2 0 002-2v-3"/></svg>
+  <button class="sb-btn" id="nav-basics">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
     Basics
     <span class="kbd-hint">2</span>
     <span class="cnt" id="cnt-basics">0</span>
   </button>
-  <button class="sb-btn" id="nav-ds" onclick="setSection('data-structures')">
-    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+  <button class="sb-btn" id="nav-ds">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5v16h4"/><path d="M15 4h4v16h-4"/></svg>
     Data Structures
     <span class="kbd-hint">3</span>
     <span class="cnt" id="cnt-ds">0</span>
   </button>
-  <button class="sb-btn" id="nav-oop" onclick="setSection('oop')">
-    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-    OOP
+  <button class="sb-btn" id="nav-fn">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3a2 2 0 00-2 2v4c0 1.1-.9 2-2 2 1.1 0 2 .9 2 2v4a2 2 0 002 2"/><path d="M16 3a2 2 0 012 2v4c0 1.1.9 2 2 2-1.1 0-2 .9-2 2v4a2 2 0 01-2 2"/></svg>
+    Functions
     <span class="kbd-hint">4</span>
-    <span class="cnt" id="cnt-oop">0</span>
+    <span class="cnt" id="cnt-fn">0</span>
   </button>
 
+  <div class="sb-sep"></div>
+  <div class="sb-label">Learn</div>
+  <button class="sb-btn study-btn" id="study-btn">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    Study Mode
+    <span class="kbd-hint">S</span>
+    <span class="cnt due-cnt" id="due-cnt">0</span>
+  </button>
+  <button class="sb-btn" id="stats-btn">
+    <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Stats
+  </button>
+
+  <div class="sb-sep"></div>
+  <div class="sb-label">Data</div>
+  <div class="sb-row">
+    <button class="btn-ghost-sm" id="export-btn" title="Export JSON">
+      <svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+    <button class="btn-ghost-sm" id="import-btn" title="Import JSON">
+      <svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import
+    </button>
+    <input type="file" id="import-file" accept="application/json,.json" style="display:none"/>
+  </div>
+  <div class="sb-row">
+    <button class="btn-ghost-sm" id="theme-btn" title="Toggle theme (T)">
+      <span id="theme-icon">☾</span> Theme
+    </button>
+  </div>
+  <div class="palette-row" id="palette-row" title="Accent color">
+    <button class="swatch" data-accent="cyan"   title="Cyan"><span class="swatch-fill" style="background:#00f5e4;color:#00f5e4"></span></button>
+    <button class="swatch" data-accent="violet" title="Violet"><span class="swatch-fill" style="background:#a855f7;color:#a855f7"></span></button>
+    <button class="swatch" data-accent="pink"   title="Pink"><span class="swatch-fill" style="background:#f472b6;color:#f472b6"></span></button>
+    <button class="swatch" data-accent="green"  title="Green"><span class="swatch-fill" style="background:#34d399;color:#34d399"></span></button>
+    <button class="swatch" data-accent="orange" title="Orange"><span class="swatch-fill" style="background:#fb923c;color:#fb923c"></span></button>
+    <button class="swatch" data-accent="red"    title="Red"><span class="swatch-fill" style="background:#f87171;color:#f87171"></span></button>
+  </div>
+
   <div class="sb-info-card">
-    <div class="sb-info-head">✦ Auto-Classify</div>
-    <div class="sb-info-text">Press <strong style="color:var(--cyan)">1-4</strong> to switch sections quickly.</div>
+    <div class="sb-info-head">✦ Storage</div>
+    <div class="storage-meter">
+      <div class="storage-bar"><div class="storage-fill" id="storage-fill" style="width:0%"></div></div>
+      <div class="storage-text" id="storage-text"><span>0 B</span><span>0%</span></div>
+    </div>
+    <div class="sb-info-text" style="margin-top:8px"><strong style="color:var(--cyan)">N</strong> new · <strong style="color:var(--cyan)">T</strong> theme · <strong style="color:var(--cyan)">1-4</strong> sections</div>
   </div>
 </aside>
 
 <div class="mobile-header">
-  <button class="icon-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">
+  <button class="icon-btn" id="mob-menu">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7a8fac" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
   </button>
   <span style="font-weight:700;font-size:14px">CPP <span style="color:var(--cyan)">ARCHIVE</span></span>
-  <button class="icon-btn" style="margin-left:auto" onclick="openAdd()">
+  <button class="icon-btn" id="mob-add" style="margin-left:auto">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
 </div>
@@ -285,7 +141,7 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events
 <main id="main">
   <section id="hero">
     <div class="hero-pill"><div class="hero-dot"></div>SYSTEM ACTIVE · INDEXING C++</div>
-    <h1 class="hero-title">Your personal<br><span class="hl">C++ codex</span></h1>
+    <h1 class="hero-title"><span class="plain">Your personal</span><br><span class="hl">C++ codex</span></h1>
     <p class="hero-sub">Write and archive C++ snippets. The engine reads your code and auto-classifies it into <b>Basics</b>, <b>Data Structures</b>, or <b>OOP</b>.</p>
     <div class="hero-stats">
       <div><div class="stat-val" id="stat-total" style="color:var(--cyan)">0</div><div class="stat-lbl">Snippets</div></div>
@@ -298,17 +154,28 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events
     <div class="filter-head">
       <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
       <span class="filter-title">Filter by Tag</span>
-      <button id="clear-tags-btn" onclick="clearTagFilters()">
+      <button id="clear-tags-btn">
         <svg class="ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Clear
       </button>
     </div>
     <div id="tag-chips"></div>
   </div>
 
+  <div class="toolbar">
+    <label style="font-family:var(--font-mono);font-size:10px;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase">Sort</label>
+    <select id="sort-select">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="title">Title A→Z</option>
+      <option value="lines-desc">Most lines</option>
+      <option value="lines-asc">Fewest lines</option>
+    </select>
+  </div>
+
   <div id="snippets-header">
     <h2 class="section-title" id="section-label">All Snippets</h2>
     <span class="badge" id="count-badge">0 items</span>
-    <button class="btn btn-cyan" style="margin-left:auto" onclick="openAdd()">
+    <button class="btn btn-cyan" style="margin-left:auto" data-action="add">
       <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Snippet
     </button>
   </div>
@@ -316,26 +183,24 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events
   <div id="grid"></div>
 </main>
 
+<!-- Add / Edit modal -->
 <div class="modal-overlay" id="add-modal">
   <div class="modal">
     <div class="modal-head">
       <h2>
         <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        New Snippet
+        <span id="modal-title-text">New Snippet</span>
       </h2>
-      <button class="icon-btn" onclick="closeAdd()">
+      <button class="icon-btn" id="add-close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <div class="grid-2">
-        <div class="field"><label>Title *</label><input class="input" id="f-title" placeholder="e.g. Binary Search"/></div>
-        <div class="field"><label>Filename</label><input class="input" id="f-filename" placeholder="binary_search.cpp" style="font-family:var(--font-mono)"/></div>
-      </div>
+      <div class="field"><label>Title *</label><input class="input" id="f-title" placeholder="e.g. Binary Search"/></div>
       <div class="field"><label>Description</label><input class="input" id="f-desc" placeholder="What does this snippet do?"/></div>
       <div class="field">
         <label>C++ Code *</label>
-        <textarea class="textarea" id="f-code" placeholder="#include &lt;iostream&gt;&#10;using namespace std;&#10;&#10;int main() {&#10;  return 0;&#10;}" oninput="liveAnalyze()"></textarea>
+        <textarea class="textarea" id="f-code" placeholder="#include &lt;iostream&gt;&#10;using namespace std;&#10;&#10;int main() {&#10;  return 0;&#10;}"></textarea>
       </div>
       <div id="auto-detect">
         <div class="detect-head"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Auto-Detected</div>
@@ -346,451 +211,235 @@ body::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events
       <div class="field">
         <label>Custom Tags</label>
         <div class="tag-input-row">
-          <input class="input" id="tag-input" placeholder="Add tag and press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag()}"/>
-          <button class="btn" onclick="addCustomTag()"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button>
+          <input class="input" id="tag-input" placeholder="Add tag and press Enter"/>
+          <button class="btn" id="tag-add-btn"><svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button>
         </div>
         <div id="custom-tags-list" style="display:flex;flex-wrap:wrap;gap:5px"></div>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeAdd()">Cancel</button>
-      <button class="btn btn-cyan" onclick="saveSnippet()">
-        <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Save Snippet
+      <button class="btn btn-ghost" id="add-cancel">Cancel</button>
+      <button class="btn btn-cyan" id="add-save">
+        <svg class="ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span id="save-btn-text">Save Snippet</span>
       </button>
     </div>
   </div>
 </div>
 
+<!-- Search modal -->
 <div class="modal-overlay" id="search-modal">
   <div class="modal" style="max-width:600px">
     <div class="search-modal-input-wrap">
       <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input class="search-modal-input" id="search-input" placeholder="Search…" oninput="renderSearch()"/>
-      <span class="search-kbd" style="cursor:pointer" onclick="closeSearch()">ESC</span>
+      <input class="search-modal-input" id="search-input" placeholder="Search…"/>
+      <span class="search-kbd" id="search-close" style="cursor:pointer">ESC</span>
     </div>
     <div class="search-results" id="search-results"></div>
   </div>
 </div>
 
+<!-- Confirm modal -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal" style="max-width:360px">
     <div class="modal-head"><h2 style="color:var(--red)"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Delete Snippet</h2></div>
     <div class="modal-body"><p style="font-size:14px;color:var(--muted);line-height:1.6">Delete <strong id="confirm-name">"..."</strong>?</p></div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
-      <button class="btn" id="confirm-ok" style="border-color:rgba(248,113,113,.4);color:var(--red);background:rgba(248,113,113,.08)" onclick="confirmDelete()">Delete</button>
+      <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn" id="confirm-ok" style="border-color:rgba(248,113,113,.4);color:var(--red);background:rgba(248,113,113,.08)">Delete</button>
     </div>
   </div>
 </div>
 
-<script>
-let snippets = [];
-let activeSection = 'all';
-let activeTags = [];
-let pendingDeleteId = null;
-let editingCustomTags = [];
+<!-- Detail modal -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal" style="max-width:860px">
+    <div class="modal-head">
+      <h2>
+        <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span id="detail-title">Snippet</span>
+      </h2>
+      <button class="icon-btn" id="detail-close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="detail-desc" style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:14px"></p>
+      <div class="detail-meta">
+        <span id="detail-section" class="badge">section</span>
+        <span>⊟ <span id="detail-lines"></span></span>
+        <span>⏱ <span id="detail-time"></span></span>
+      </div>
+      <div class="detail-code-wrap"><pre><code id="detail-code"></code></pre></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="detail-edit">Edit</button>
+      <button class="btn btn-cyan" id="detail-copy">Copy code</button>
+    </div>
+  </div>
+</div>
 
-const STORAGE_KEY = 'cpp-archive-v3';
+<!-- Study Mode modal -->
+<div class="modal-overlay" id="study-modal">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-head">
+      <h2>
+        <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Study Mode
+        <span class="badge badge-cyan" id="study-progress" style="margin-left:8px">0 / 0</span>
+      </h2>
+      <button class="icon-btn" id="study-close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="study-picker">
+        <div class="picker-title">What do you want to practice?</div>
 
-const SEED = [
-  { id:'s1', title:'Vector Reversal', description:'Reverses a vector in-place using two-pointer technique.', filename:'reverse_vec.cpp',
-    code:`#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid reverseVector(vector<int>& v) {\n  int left = 0, right = v.size() - 1;\n  while (left < right) {\n    swap(v[left], v[right]);\n    left++; right--;\n  }\n}`,
-    section:'basics', tags:['arrays','loops','functions','io'], customTags:['two-pointer'], createdAt: Date.now()-86400000*3 },
-  { id:'s2', title:'Singly Linked List', description:'Linked list with insert at head and traversal.', filename:'linked_list.cpp',
-    code:`#include <iostream>\nusing namespace std;\n\nstruct Node {\n  int data;\n  Node* next;\n  Node(int x) : data(x), next(nullptr) {}\n};\n\nclass LinkedList {\n  Node* head;\npublic:\n  LinkedList() : head(nullptr) {}\n  void insert(int val) {\n    Node* n = new Node(val);\n    n->next = head;\n    head = n;\n  }\n};`,
-    section:'data-structures', tags:['linked-list','class','pointers','loops'], customTags:[], createdAt: Date.now()-86400000*2 },
-  { id:'s3', title:'Shape Polymorphism', description:'Virtual functions and inheritance.', filename:'shapes.cpp',
-    code:`#include <iostream>\nusing namespace std;\n\nclass Shape {\npublic:\n  virtual double area() const = 0;\n  virtual ~Shape() {}\n};\n\nclass Circle : public Shape {\n  double r;\npublic:\n  Circle(double radius) : r(radius) {}\n  double area() const override { return 3.14159 * r * r; }\n};`,
-    section:'oop', tags:['class','inheritance','polymorphism','destructor'], customTags:['abstract-class'], createdAt: Date.now()-3600000 }
-];
-
-function load() {
-  try { const d = localStorage.getItem(STORAGE_KEY); if (d) { snippets = JSON.parse(d); return; } } catch(e){}
-  snippets = JSON.parse(JSON.stringify(SEED));
-}
-function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snippets)); } catch(e){} }
-
-// ═══════════════ NEW HELPER FUNCTIONS — added by Omar ═══════════════
-
-/* Format timestamp as "5 minutes ago", "3 days ago", etc. */
-function formatRelativeTime(timestamp) {
-  if (!timestamp) return 'Unknown';
-  const seconds = Math.floor((Date.now() - timestamp) / 1000);
-
-  if (seconds < 60) return 'Just now';
-  if (seconds < 3600) {
-    const m = Math.floor(seconds / 60);
-    return `${m} minute${m === 1 ? '' : 's'} ago`;
-  }
-  if (seconds < 86400) {
-    const h = Math.floor(seconds / 3600);
-    return `${h} hour${h === 1 ? '' : 's'} ago`;
-  }
-  if (seconds < 2592000) {
-    const d = Math.floor(seconds / 86400);
-    return `${d} day${d === 1 ? '' : 's'} ago`;
-  }
-  if (seconds < 31536000) {
-    const mo = Math.floor(seconds / 2592000);
-    return `${mo} month${mo === 1 ? '' : 's'} ago`;
-  }
-  const y = Math.floor(seconds / 31536000);
-  return `${y} year${y === 1 ? '' : 's'} ago`;
-}
-
-/* Count number of lines in a code string */
-function countLines(code) {
-  if (!code) return 0;
-  return code.split('\n').length;
-}
-
-// ═══════════════ EXISTING CODE ═══════════════
-
-const RULES = {
-  'data-structures': { label:'Data Structures', weight:3, badge:'badge-violet', rules:[
-    { pat:[/struct\s+Node/i,/class\s+Node/i,/->next/,/->prev/,/LinkedList/i], tag:'linked-list', sc:5 },
-    { pat:[/stack</i,/std::stack/i,/class\s+Stack/i], tag:'stack', sc:5 },
-    { pat:[/queue</i,/std::queue/i,/enqueue/i,/dequeue/i], tag:'queue', sc:5 },
-    { pat:[/struct\s+TreeNode/i,/class\s+Tree/i,/->left/,/->right/,/BST/i,/BinaryTree/i], tag:'tree', sc:5 },
-    { pat:[/Graph/i,/adjacency/i,/\bBFS\b/,/\bDFS\b/,/dijkstra/i], tag:'graph', sc:5 },
-    { pat:[/unordered_map/,/std::map/,/HashMap/i], tag:'hash-map', sc:4 },
-    { pat:[/unordered_set/,/std::set/], tag:'set', sc:3 },
-  ]},
-  'oop': { label:'OOP', weight:2, badge:'badge-green', rules:[
-    { pat:[/:\s*public\s+\w+/,/:\s*private\s+\w+/,/:\s*protected\s+\w+/], tag:'inheritance', sc:5 },
-    { pat:[/\bvirtual\s+/,/\boverride\b/,/\babstract\b/], tag:'polymorphism', sc:5 },
-    { pat:[/template\s*</], tag:'templates', sc:5 },
-    { pat:[/operator\s*[+\-*\/=<>]/,/operator\s*\(\)/], tag:'operator-overload', sc:4 },
-    { pat:[/class\s+\w+[\s:{]/], tag:'class', sc:3 },
-    { pat:[/public:/,/private:/,/protected:/], tag:'encapsulation', sc:2 },
-    { pat:[/~\w+\s*\(/], tag:'destructor', sc:3 },
-    { pat:[/\bstatic\s+/], tag:'static', sc:2 },
-    { pat:[/namespace\s+/], tag:'namespace', sc:2 },
-    { pat:[/\bfriend\s+/], tag:'friend', sc:3 },
-  ]},
-  'basics': { label:'Basics', weight:1, badge:'badge-cyan', rules:[
-    { pat:[/\bint\s+\w+\s*\[/,/vector</,/\w+\[\d+\]/], tag:'arrays', sc:3 },
-    { pat:[/\bfor\s*\(/,/\bwhile\s*\(/,/\bdo\s*\{/], tag:'loops', sc:3 },
-    { pat:[/\bif\s*\(/,/\bswitch\s*\(/,/\bcase\s+/], tag:'conditionals', sc:3 },
-    { pat:[/\breturn\s+/], tag:'functions', sc:2 },
-    { pat:[/\*\w+/,/&\w+/,/nullptr/,/\bNULL\b/], tag:'pointers', sc:4 },
-    { pat:[/\bstring\s+/,/std::string/,/\bchar\s/], tag:'strings', sc:3 },
-    { pat:[/cin\s*>>/,/cout\s*<</,/getline/], tag:'io', sc:2 },
-  ]}
-};
-
-function analyzeCode(code) {
-  const scores = {'basics':0,'oop':0,'data-structures':0};
-  const tags = new Set();
-  for (const [sid, def] of Object.entries(RULES)) {
-    for (const rule of def.rules) {
-      if (rule.pat.some(p => p.test(code))) {
-        scores[sid] += rule.sc * def.weight;
-        tags.add(rule.tag);
-      }
-    }
-  }
-  let primary = 'basics', max = 0;
-  for (const [s,v] of Object.entries(scores)) if (v > max){ max=v; primary=s; }
-  return { primary, tags: [...tags] };
-}
-
-const KW = ['if','else','for','while','do','switch','case','break','continue','return','class','struct','public','private','protected','virtual','override','static','const','new','delete','this','template','typename','namespace','using','try','catch','throw','operator','friend','inline','explicit','mutable','volatile','enum','typedef','sizeof','nullptr','true','false'];
-const TY = ['int','char','float','double','void','bool','long','short','unsigned','signed','auto','string','vector','map','set','queue','stack','pair','size_t','std','deque','list','array','tuple'];
-
-function hl(raw) {
-  let s = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  s = s.replace(/\/\/[^\n]*/g, m=>`\x01${m}\x02`);
-  s = s.replace(/\/\*[\s\S]*?\*\//g, m=>`\x01${m}\x02`);
-  s = s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, m=>`\x03${m}\x04`);
-  s = s.replace(/(^#\w+[^\n]*)/gm, `\x05$1\x06`);
-  s = s.replace(/\b(\d+\.?\d*[uUlLfF]*)\b/g,'<span class="n">$1</span>');
-  KW.forEach(k=>{ s=s.replace(new RegExp(`\\b${k}\\b`,'g'),`<span class="k">${k}</span>`); });
-  TY.forEach(t=>{ s=s.replace(new RegExp(`\\b${t}\\b`,'g'),`<span class="t">${t}</span>`); });
-  s = s.replace(/\b([a-zA-Z_]\w*)\s*\(/g,(m,name)=>{
-    if(KW.includes(name)||TY.includes(name)) return m;
-    return `<span class="f">${name}</span>(`;
-  });
-  s = s.replace(/\x03([\s\S]*?)\x04/g,'<span class="s">$1</span>');
-  s = s.replace(/\x01([\s\S]*?)\x02/g,'<span class="c">$1</span>');
-  s = s.replace(/\x05([\s\S]*?)\x06/g,'<span class="p">$1</span>');
-  return s;
-}
-
-function sectionLabel(id) { return (RULES[id]||{label:'All'}).label; }
-function sectionBadge(id) { return (RULES[id]||{badge:'badge-cyan'}).badge; }
-
-function allTagsList() {
-  const s = new Set();
-  snippets.forEach(sn => { sn.tags.forEach(t=>s.add(t)); (sn.customTags||[]).forEach(t=>s.add(t)); });
-  return [...s].sort();
-}
-
-function filtered() {
-  return snippets.filter(sn => {
-    if (activeSection !== 'all' && sn.section !== activeSection) return false;
-    if (activeTags.length > 0) {
-      const all = [...sn.tags, ...(sn.customTags||[])];
-      if (!activeTags.every(t=>all.includes(t))) return false;
-    }
-    return true;
-  });
-}
-
-function renderTagBar() {
-  const tags = allTagsList();
-  const el = document.getElementById('tag-chips');
-  el.innerHTML = '';
-  tags.forEach(t => {
-    const btn = document.createElement('button');
-    btn.className = 'tag' + (activeTags.includes(t)?' active':'');
-    btn.textContent = t;
-    btn.onclick = () => toggleTagFilter(t);
-    el.appendChild(btn);
-  });
-  document.getElementById('clear-tags-btn').style.display = activeTags.length > 0 ? 'inline-flex' : 'none';
-  document.getElementById('filter-bar').style.display = tags.length > 0 ? 'block' : 'none';
-}
-
-function toggleTagFilter(t) {
-  activeTags = activeTags.includes(t) ? activeTags.filter(x=>x!==t) : [...activeTags,t];
-  renderAll();
-}
-function clearTagFilters() { activeTags=[]; renderAll(); }
-
-function renderGrid() {
-  const grid = document.getElementById('grid');
-  const list = filtered();
-  document.getElementById('section-label').textContent = activeSection==='all' ? 'All Snippets' : sectionLabel(activeSection);
-  document.getElementById('count-badge').textContent = `${list.length} ${list.length===1?'item':'items'}`;
-
-  if (list.length === 0) {
-    grid.innerHTML = `<div id="empty"><div style="font-size:28px;margin-bottom:12px;opacity:.4">⊚</div><h3>No snippets here yet</h3><p>${activeTags.length?'Try removing filters':'Add your first C++ snippet'}</p></div>`;
-    return;
-  }
-
-  grid.innerHTML = '';
-  list.forEach((sn, i) => {
-    const allT = [...sn.tags, ...(sn.customTags||[])];
-    const card = document.createElement('div');
-    card.className = 'snippet-card';
-    card.style.animationDelay = `${i*55}ms`;
-    const tagsHtml = [
-      `<span class="badge ${sectionBadge(sn.section)}"># ${sectionLabel(sn.section)}</span>`,
-      ...allT.slice(0,7).map(t => {
-        const isCust = (sn.customTags||[]).includes(t);
-        return `<button class="tag ${isCust?'custom':''}" onclick="toggleTagFilter('${t}')">${isCust?'⊹ ':''}${t}</button>`;
-      })
-    ].join('');
-
-    /* ─── META ROW ADDED — by Omar ─── */
-    const lines = countLines(sn.code);
-    const timeAgo = formatRelativeTime(sn.createdAt);
-
-    card.innerHTML = `
-      <div class="card-head">
-        <div class="card-file">
-          <svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          ${sn.filename}
-          <span class="card-actions">
-            <button class="icon-btn" id="copy-${sn.id}" title="Copy code" onclick="copyCode('${sn.id}')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            </button>
-            <button class="icon-btn danger" title="Delete" onclick="askDelete('${sn.id}','${sn.title.replace(/'/g,"\\'")}')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-            </button>
-          </span>
+        <div class="picker-row">
+          <div class="picker-row-label">By section</div>
+          <div class="picker-chips" id="picker-sections"></div>
         </div>
-        <div class="card-title">${sn.title}</div>
-        <div class="card-desc">${sn.description}</div>
-        <div class="card-tags">${tagsHtml}</div>
+        <div class="picker-row">
+          <div class="picker-row-label">By concept</div>
+          <div class="picker-chips" id="picker-tags"></div>
+        </div>
 
-        <!-- ─── Meta info: lines + date — added by Omar ─── -->
-        <div class="card-meta">
-          <span class="card-meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-            <span class="lines-badge">${lines}</span> ${lines === 1 ? 'line' : 'lines'}
-          </span>
-          <span class="card-meta-divider"></span>
-          <span class="card-meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            ${timeAgo}
-          </span>
+        <label class="picker-cb">
+          <input type="checkbox" id="due-only-cb" checked/>
+          <span>Only due cards (skip cards not yet ready)</span>
+        </label>
+      </div>
+
+      <div id="study-empty" style="display:none;text-align:center;padding:40px 20px">
+        <div style="font-size:54px;margin-bottom:16px">🎓</div>
+        <h3 style="font-size:18px;margin-bottom:10px">Nothing to study here</h3>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:20px">No cards match this filter.</p>
+        <button class="btn btn-cyan" id="study-all-btn">Back to picker</button>
+      </div>
+
+      <div id="study-card" style="display:none">
+        <div class="study-meta">
+          <span class="badge" id="study-section"></span>
+          <span class="study-streak" id="study-streak"></span>
+        </div>
+        <div class="study-question">
+          <div class="study-q-label">Recall this snippet:</div>
+          <h2 class="study-title" id="study-title"></h2>
+          <p class="study-desc" id="study-desc"></p>
+          <div class="study-tags" id="study-tags"></div>
+        </div>
+
+        <div id="study-prompt" style="padding:18px 0 4px">
+          <p style="color:var(--muted);font-size:13px;margin-bottom:10px;text-align:center">Try writing the code below — or just reveal the answer.</p>
+          <textarea id="study-attempt" class="textarea" placeholder="// Type your C++ attempt here (optional)…" style="min-height:160px;margin-bottom:14px"></textarea>
+          <div class="study-actions">
+            <button class="btn btn-ghost" id="study-reveal">
+              <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Reveal Without Trying
+            </button>
+            <button class="btn btn-cyan" id="study-check">
+              <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Check My Answer
+            </button>
+          </div>
+        </div>
+
+        <div id="study-answer" style="display:none">
+          <div id="study-analysis" style="display:none">
+            <div class="score-row">
+              <div class="score-ring" id="score-ring">
+                <svg viewBox="0 0 100 100" width="92" height="92">
+                  <circle cx="50" cy="50" r="42" stroke="var(--border)" stroke-width="8" fill="none"/>
+                  <circle id="score-arc" cx="50" cy="50" r="42" stroke="var(--cyan)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
+                </svg>
+                <div class="score-num" id="score-num">0%</div>
+              </div>
+              <div class="score-info">
+                <div class="score-rating" id="score-rating">—</div>
+                <div class="score-sub" id="score-sub"></div>
+              </div>
+            </div>
+
+            <div class="concept-breakdown">
+              <div class="concept-group" id="cg-matched">
+                <div class="concept-head"><span class="concept-dot ok"></span>Concepts you got</div>
+                <div class="concept-tags" id="ct-matched"></div>
+              </div>
+              <div class="concept-group" id="cg-missed">
+                <div class="concept-head"><span class="concept-dot bad"></span>Concepts you missed</div>
+                <div class="concept-tags" id="ct-missed"></div>
+              </div>
+              <div class="concept-group" id="cg-extra" style="display:none">
+                <div class="concept-head"><span class="concept-dot warn"></span>Extra concepts (not in reference)</div>
+                <div class="concept-tags" id="ct-extra"></div>
+              </div>
+            </div>
+
+            <div class="compare-row">
+              <div class="compare-pane">
+                <div class="compare-head">YOUR CODE</div>
+                <pre><code id="study-user-code"></code></pre>
+              </div>
+              <div class="compare-pane">
+                <div class="compare-head">REFERENCE</div>
+                <pre><code id="study-ref-code"></code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="study-plain-answer" class="detail-code-wrap" style="margin-bottom:18px"><pre><code id="study-code"></code></pre></div>
+          <div class="study-rating">
+            <div class="study-r-label">How well did you remember?</div>
+            <div class="study-r-btns">
+              <button class="rate-btn rate-wrong" data-rating="wrong">
+                <span class="rate-icon">✗</span>
+                <span class="rate-text">Didn't know</span>
+                <span class="rate-hint">1 day</span>
+              </button>
+              <button class="rate-btn rate-hard" data-rating="hard">
+                <span class="rate-icon">~</span>
+                <span class="rate-text">Hard</span>
+                <span class="rate-hint" id="hint-hard">3 days</span>
+              </button>
+              <button class="rate-btn rate-good" data-rating="good">
+                <span class="rate-icon">✓</span>
+                <span class="rate-text">Got it</span>
+                <span class="rate-hint" id="hint-good">7 days</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="code-wrap"><pre class="code-block"><code>${hl(sn.code)}</code></pre></div>`;
-    grid.appendChild(card);
-  });
-}
 
-function renderCounts() {
-  const counts = {basics:0,'data-structures':0,oop:0};
-  snippets.forEach(s=>{ counts[s.section]=(counts[s.section]||0)+1; });
-  document.getElementById('cnt-all').textContent = snippets.length;
-  document.getElementById('cnt-basics').textContent = counts.basics;
-  document.getElementById('cnt-ds').textContent = counts['data-structures'];
-  document.getElementById('cnt-oop').textContent = counts.oop;
-  document.getElementById('stat-total').textContent = snippets.length;
-  document.getElementById('stat-tags').textContent = allTagsList().length;
-}
+      <div id="study-done" style="display:none;text-align:center;padding:30px 20px">
+        <div style="font-size:54px;margin-bottom:16px">🏆</div>
+        <h3 style="font-size:20px;margin-bottom:10px">Session complete!</h3>
+        <div class="session-stats" id="session-stats"></div>
+        <div id="weak-tags-host"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-function renderAll() {
-  renderCounts(); renderTagBar(); renderGrid();
-  ['all','basics','data-structures','oop'].forEach(id=>{
-    const el = document.getElementById('nav-'+(id==='data-structures'?'ds':id));
-    if(el) el.classList.toggle('active', activeSection===id);
-  });
-}
+<!-- Stats modal -->
+<div class="modal-overlay" id="stats-modal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-head">
+      <h2>
+        <svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Learning Stats
+      </h2>
+      <button class="icon-btn" id="stats-close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="stats-body"></div>
+  </div>
+</div>
 
-function setSection(id) { activeSection = id; activeTags = []; renderAll(); }
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
-async function copyCode(id) {
-  const sn = snippets.find(s=>s.id===id);
-  if (!sn) return;
-  try { await navigator.clipboard.writeText(sn.code); } catch(e) {
-    const ta = document.createElement('textarea'); ta.value = sn.code;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-  }
-  const btn = document.getElementById('copy-'+id);
-  if (!btn) return;
-  btn.classList.add('copied');
-  btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
-  setTimeout(()=>{
-    btn.classList.remove('copied');
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
-  }, 1500);
-}
-
-function askDelete(id, title) {
-  pendingDeleteId = id;
-  document.getElementById('confirm-name').textContent = `"${title}"`;
-  document.getElementById('confirm-modal').classList.add('open');
-}
-function closeConfirm() { pendingDeleteId = null; document.getElementById('confirm-modal').classList.remove('open'); }
-function confirmDelete() {
-  if (!pendingDeleteId) return;
-  snippets = snippets.filter(s=>s.id!==pendingDeleteId);
-  save(); renderAll(); closeConfirm();
-}
-
-function openAdd() {
-  editingCustomTags = [];
-  document.getElementById('f-title').value = '';
-  document.getElementById('f-filename').value = '';
-  document.getElementById('f-desc').value = '';
-  document.getElementById('f-code').value = '';
-  document.getElementById('tag-input').value = '';
-  document.getElementById('custom-tags-list').innerHTML = '';
-  document.getElementById('auto-detect').classList.remove('visible');
-  document.getElementById('add-modal').classList.add('open');
-  setTimeout(()=>document.getElementById('f-title').focus(), 80);
-}
-function closeAdd() { document.getElementById('add-modal').classList.remove('open'); }
-
-function liveAnalyze() {
-  const code = document.getElementById('f-code').value;
-  const panel = document.getElementById('auto-detect');
-  if (code.trim().length < 15) { panel.classList.remove('visible'); return; }
-  const r = analyzeCode(code);
-  const def = RULES[r.primary];
-  document.getElementById('detect-section').className = `badge ${def.badge}`;
-  document.getElementById('detect-section').textContent = def.label;
-  const tc = document.getElementById('detect-tags');
-  tc.innerHTML = r.tags.length === 0 ? '<span style="font-size:11px;color:var(--muted2)">none yet</span>' : r.tags.map(t=>`<span class="tag">${t}</span>`).join('');
-  panel.classList.add('visible');
-}
-
-function addCustomTag() {
-  const inp = document.getElementById('tag-input');
-  const t = inp.value.trim().toLowerCase().replace(/\s+/g,'-');
-  if (!t || editingCustomTags.includes(t)) { inp.value=''; return; }
-  editingCustomTags.push(t); inp.value = ''; renderCustomTagList();
-}
-function removeCustomTag(t) { editingCustomTags = editingCustomTags.filter(x=>x!==t); renderCustomTagList(); }
-function renderCustomTagList() {
-  document.getElementById('custom-tags-list').innerHTML = editingCustomTags.map(t=>`<button class="tag custom" onclick="removeCustomTag('${t}')"><svg class="ico" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>${t}</button>`).join('');
-}
-
-function saveSnippet() {
-  const title = document.getElementById('f-title').value.trim();
-  const code  = document.getElementById('f-code').value.trim();
-  if (!title || !code) { alert('Title and Code are required.'); return; }
-  const r = analyzeCode(code);
-  const filename = document.getElementById('f-filename').value.trim() || title.toLowerCase().replace(/[^a-z0-9]+/g,'_')+'.cpp';
-  snippets.unshift({
-    id: 'sn_'+Date.now(), title,
-    description: document.getElementById('f-desc').value.trim() || 'No description provided.',
-    filename, code, section: r.primary, tags: r.tags,
-    customTags: [...editingCustomTags], createdAt: Date.now()
-  });
-  save(); renderAll(); closeAdd();
-}
-
-function openSearch() { document.getElementById('search-modal').classList.add('open'); setTimeout(()=>document.getElementById('search-input').focus(), 60); renderSearch(); }
-function closeSearch() { document.getElementById('search-modal').classList.remove('open'); document.getElementById('search-input').value = ''; }
-function renderSearch() {
-  const q = document.getElementById('search-input').value.toLowerCase().trim();
-  const pool = q ? snippets.filter(s =>
-    s.title.toLowerCase().includes(q) || s.description.toLowerCase().includes(q) ||
-    s.code.toLowerCase().includes(q) || s.tags.some(t=>t.includes(q)) ||
-    (s.customTags||[]).some(t=>t.includes(q))
-  ) : snippets.slice(0,10);
-  const el = document.getElementById('search-results');
-  if (pool.length === 0) { el.innerHTML = `<div class="search-empty">No matches found</div>`; return; }
-  el.innerHTML = pool.map(s=>`
-    <button class="search-item" onclick="jumpTo('${s.id}')">
-      <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <div class="search-item-info"><div class="search-item-title">${s.title}</div><div class="search-item-file">${s.filename}</div></div>
-      <span class="badge ${sectionBadge(s.section)}">${sectionLabel(s.section)}</span>
-    </button>`).join('');
-}
-function jumpTo(id) {
-  const sn = snippets.find(s=>s.id===id);
-  if (sn) { activeSection = sn.section; activeTags = []; renderAll(); }
-  closeSearch();
-}
-
-// ═══════════════ KEYBOARD SHORTCUTS — added by Omar ═══════════════
-document.addEventListener('keydown', e => {
-  // Skip if user is typing in an input
-  const tag = document.activeElement.tagName;
-  const isTyping = tag === 'INPUT' || tag === 'TEXTAREA';
-
-  // Cmd+K / Ctrl+K toggles search (existing)
-  if ((e.metaKey||e.ctrlKey) && e.key==='k') {
-    e.preventDefault();
-    document.getElementById('search-modal').classList.contains('open') ? closeSearch() : openSearch();
-    return;
-  }
-
-  if (e.key === 'Escape') {
-    closeSearch(); closeAdd(); closeConfirm();
-    return;
-  }
-
-  // ─── Number keys 1-4 for section navigation — added by Omar ───
-  if (!isTyping && !e.metaKey && !e.ctrlKey && !e.altKey) {
-    if (e.key === '1') { setSection('all'); }
-    else if (e.key === '2') { setSection('basics'); }
-    else if (e.key === '3') { setSection('data-structures'); }
-    else if (e.key === '4') { setSection('oop'); }
-  }
-});
-
-['add-modal','search-modal','confirm-modal'].forEach(id=>{
-  document.getElementById(id).addEventListener('click', function(e){ if (e.target===this) this.classList.remove('open'); });
-});
-
-// ═══════════════ AUTO-REFRESH RELATIVE TIMES — added by Omar ═══════════════
-// Every minute, re-render the grid so "5 minutes ago" stays accurate
-setInterval(() => {
-  if (document.getElementById('grid').children.length > 0) {
-    renderGrid();
-  }
-}, 60000);
-
-load();
-renderAll();
-</script>
+<script src="app.js"></script>
 </body>
 </html>

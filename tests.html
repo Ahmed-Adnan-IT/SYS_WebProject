@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>C++ Archive · Tests</title>
+<style>
+  body { font-family: ui-monospace, monospace; background:#0d1420; color:#e8f0ff; padding:30px; line-height:1.6; }
+  h1 { color:#00f5e4; margin-bottom:20px; }
+  .test { padding:8px 12px; border-radius:6px; margin:4px 0; }
+  .pass { background:rgba(52,211,153,.1); color:#34d399; border-left:3px solid #34d399; }
+  .fail { background:rgba(248,113,113,.1); color:#f87171; border-left:3px solid #f87171; }
+  .summary { margin-top:24px; padding:14px 18px; border-radius:8px; background:#101828; font-size:15px; }
+  code { background:#060a10; padding:1px 6px; border-radius:4px; color:#fbbf24; }
+</style>
+</head>
+<body>
+<h1>⌁ C++ Archive — Unit Tests</h1>
+<div id="out"></div>
+<div class="summary" id="summary"></div>
+
+<script src="app.js"></script>
+<script>
+const out = document.getElementById('out');
+let passed = 0, failed = 0;
+
+function test(name, fn) {
+  try {
+    fn();
+    out.innerHTML += `<div class="test pass">✓ ${name}</div>`;
+    passed++;
+  } catch(e) {
+    out.innerHTML += `<div class="test fail">✗ ${name} — ${e.message}</div>`;
+    failed++;
+  }
+}
+function eq(a, b, msg) {
+  if (a !== b) throw new Error(`${msg||''} expected <code>${JSON.stringify(b)}</code>, got <code>${JSON.stringify(a)}</code>`);
+}
+function ok(v, msg) { if (!v) throw new Error(msg || 'expected truthy'); }
+
+setTimeout(() => {
+  const { escapeHTML, formatRelativeTime, countLines, formatBytes, analyzeCode } = window.__archive;
+
+  // escapeHTML
+  test('escapeHTML escapes <script>', () => eq(escapeHTML('<script>'), '&lt;script&gt;'));
+  test('escapeHTML escapes quotes', () => eq(escapeHTML(`"a'b"`), '&quot;a&#39;b&quot;'));
+  test('escapeHTML escapes ampersand', () => eq(escapeHTML('a & b'), 'a &amp; b'));
+  test('escapeHTML handles null', () => eq(escapeHTML(null), ''));
+  test('escapeHTML handles numbers', () => eq(escapeHTML(42), '42'));
+
+  // countLines
+  test('countLines empty', () => eq(countLines(''), 0));
+  test('countLines single', () => eq(countLines('hello'), 1));
+  test('countLines multiline', () => eq(countLines('a\nb\nc'), 3));
+  test('countLines null', () => eq(countLines(null), 0));
+
+  // formatRelativeTime
+  test('formatRelativeTime now', () => eq(formatRelativeTime(Date.now()), 'Just now'));
+  test('formatRelativeTime 5 min', () => eq(formatRelativeTime(Date.now() - 5*60*1000), '5 minutes ago'));
+  test('formatRelativeTime 1 hour', () => eq(formatRelativeTime(Date.now() - 3600*1000), '1 hour ago'));
+  test('formatRelativeTime 3 days', () => eq(formatRelativeTime(Date.now() - 3*86400*1000), '3 days ago'));
+  test('formatRelativeTime unknown', () => eq(formatRelativeTime(0), 'Unknown'));
+
+  // formatBytes
+  test('formatBytes < 1KB', () => eq(formatBytes(500), '500 B'));
+  test('formatBytes KB', () => eq(formatBytes(1536), '1.5 KB'));
+  test('formatBytes MB', () => eq(formatBytes(2 * 1024 * 1024), '2.00 MB'));
+
+  // analyzeCode
+  test('analyzeCode detects basics (loops)', () => {
+    const r = analyzeCode('for(int i=0;i<10;i++) cout << i;');
+    eq(r.primary, 'basics');
+    ok(r.tags.includes('loops'));
+    ok(r.tags.includes('io'));
+  });
+  test('analyzeCode detects external function (excludes main)', () => {
+    const r = analyzeCode('void greet() { cout << "hi"; } int main() { greet(); }');
+    eq(r.primary, 'functions');
+    ok(r.tags.includes('functions'));
+  });
+  test('analyzeCode skips functions when only main is present', () => {
+    const r = analyzeCode('int main() { cout << "hi"; return 0; }');
+    ok(!r.tags.includes('functions'));
+  });
+  test('analyzeCode detects DS (linked-list)', () => {
+    const r = analyzeCode('struct Node { int data; Node* next; }; head->next = nullptr;');
+    eq(r.primary, 'data-structures');
+    ok(r.tags.includes('linked-list'));
+  });
+  test('analyzeCode detects DS (tree)', () => {
+    const r = analyzeCode('struct TreeNode { TreeNode* left; TreeNode* right; };');
+    eq(r.primary, 'data-structures');
+    ok(r.tags.includes('tree'));
+  });
+  test('analyzeCode handles template (vector<int>)', () => {
+    const r = analyzeCode('vector<int> v; for(int x : v) cout << x;');
+    ok(r.tags.includes('arrays'));
+    ok(r.tags.includes('loops'));
+  });
+  test('analyzeCode empty defaults to basics', () => {
+    const r = analyzeCode('');
+    eq(r.primary, 'basics');
+    eq(r.tags.length, 0);
+  });
+
+  document.getElementById('summary').innerHTML =
+    `<strong style="color:${failed?'#f87171':'#34d399'}">${passed} passed, ${failed} failed</strong> · ${passed+failed} total`;
+}, 100);
+</script>
+</body>
+</html>
